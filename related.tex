@@ -1,0 +1,80 @@
+\section{Related work}
+\label{sec:rel}
+
+Many cloud storage systems supporting geo-replication have emerged in recent years.
+Some of these systems offer variants of eventual consistency, where operations produce
+responses right after being executed in a single data center (usually the closest
+one) and are replicated in the background, so that user observed latency is improved~\cite{dynamo,cops,eiger,chainreaction,cassandra}.
+%This approach is very popular, as it allows low latency for end-users, by having data centers in multiple locations scattered across the globe and executing %users' operation in the closest datacenter.
+These variants target different requirements, such as: reading a causally consistent view of the database (causal consistency) \cite{cops,chainreaction,orbe,bolton}; supporting limited transactions where a set of updates are made visible atomically \cite{eiger,ramp}; supporting application-specific or type-specific reconciliation with no lost updates \cite{dynamo,cops,walter,riak}, etc.
+
+While some systems implement eventual consistency by relying on a simple last-writer-wins
+strategy, others have explored the semantics of applications (and data types).
+Semantic types \cite{semanticDDB} have been used for building non-serializable 
+schedules that preserve consistency in distributed databases. 
+Conflict-free replicated data types~\cite{crdts} explore commutativity 
+for enabling the automatic merge of concurrent updates to the same data types.
+
+Eventual consistency is insufficient for some applications that require 
+some operations to execute under strong consistency for correctness. 
+To this end, several systems support strong consistency. 
+Spanner provides strong consistency for the whole database, at the cost
+of incurring coordination overhead for all updates  \cite{spanner}. 
+Transaction chains support transaction serializability with latency
+proportional to the latency to the first replica that the corresponding transaction accesses~\cite{transactionchains}.
+MDCC \cite{mdcc} and Replicated Commit \cite{replicatedcommit} propose optimized approaches for executing transactions but still incur inter-data center latency for committing transactions.
+
+%Systems that provide strong consistency incur in coordination overhead that increases latency of operations. 
+Some systems combine the benefits of weak and strong consistency models by allowing both levels to coexist. 
+In Walter \cite{walter}, transactions that can execute under weak consistency run fast, without needing to coordinate with other datacenters.
+Bayou \cite{bayou} and Pileus \cite{Pileus} allow operations to read data with different consistency levels, from strong to eventual consistency.
+PNUTS \cite{pnuts} and DynamoDB \cite{dynamoDB} also combine weak consistency with per-object strong consistency relying on conditional writes, where a write fails in the presence of concurrent writes.
+RedBlue consistency also combines weak and strong consistency in the same system. 
+Unlike other systems, RedBlue consistency splits operations into
+generator and shadow parts to allow more 
+operations to commute, and define a procedure to help programmers labeling shadow operations 
+as weak or strong.
+
+Escrow transactions \cite{ONeil1986Escrow} offer a mechanism for
+enforcing numeric invariants under concurrent execution of transactions.
+By enforcing local invariants in each transaction, they can guarantee that a
+global invariant is not broken.
+This  idea can be applied to other data types, and it has been 
+explored for supporting disconnected operation
+in mobile computing \cite{Walborn95Semantics,mobisnap,exo-leasing}.
+Balegas et al.~\cite{Balegas2015Counter} proposed the bounded counter CRDT
+that can be used to enforce numeric invariants in weakly consistent cloud
+databases.
+The demarcation protocol \cite{BarbaraMilla1994Demarcation} aims at maintaining invariants
+in distributed databases. 
+Although its underlying protocols are similar to escrow-based 
+approaches, it focuses on maintaining invariants across different objects.
+Warranties \cite{warranties} provide time-limited assertions over the database state, which can improve latency of read operations in cloud storages.
+Indigo builds on similar ideas for enforcing application invariants, 
+but it is the first piece of work
+to provide an approach that, starting from application invariants expressed in first-order
+logic, leads to the deployment of the appropriate techniques for enforcing such 
+invariants in a geo-replicated weakly consistent data store. 
+Gotsman et. al. \cite{GotsmanConsistencyReason} propose a proof rule 
+for establishing that the use of a given set of techniques is
+sufficient to ensure the preservation of invariants.
+
+The static analysis of code is a standard technique used extensively for 
+various purposes, 
+including in a context similar to ours.
+SIEVE \cite{Li14Automating} combines static and dynamic analysis to infer
+which operations should use strong consistency and which operations should
+use weak consistency in a RedBlue system \cite{Li2012RedBlue}.
+Roy et al. \cite{Roy14Writes} present an analysis algorithm that
+describes the semantics of transactions.
+These works are complementary to ours, since the proposed techniques
+could be used to automatically infer application side effects.
+%The latter work also proposes an algorithm to allow replicas to
+%execute transactions independently by defining conditions that must
+%be met in each replica. 
+%Whenever an operation cannot commit locally, 
+%a new set of conditions is computed and installed in all replicas
+%using two-phase commit. 
+%In \oursystem{}, replicas can exchange rights in a peer-to-peer manner. 
+
+

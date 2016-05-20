@@ -1,0 +1,353 @@
+\documentclass[11pt,dvipdfm]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{deauthor,times,graphicx,hyperref}
+\usepackage{subfig}
+\usepackage{paralist}
+\usepackage{multirow}
+\usepackage{macros}
+
+%for highlight changes
+\usepackage{soul}
+
+\begin{document}
+
+\title{Geo-Replication: Fast If Possible, Consistent If Necessary\thanks{Student author are followed by faculty author names, both in alphabetical order. Cheng Li and Valter Balegas are the lead authors of the work.}}
+
+\author{Valter Balegas$^1$, Cheng Li$^2$, Mahsa Najafzadeh$^4$, Daniel Porto$^{3}$, 
+Allen Clement$^{2,5}$, Sérgio Duarte$^1$, \\
+Carla Ferreira$^1$, Johannes Gehrke$^6$, Jo\~{a}o Leit\~{a}o$^1$, Nuno Preguiça$^1$, Rodrigo Rodrigues$^3$, \\
+Marc Shapiro$^4$, Viktor Vafeiadis$^2$\\
+\small $^1$NOVA LINCS, DI, FCT, Universidade NOVA de Lisboa
+$^2$Max Planck Institute for Software Systems (MPI-SWS)\\
+\small $^3$INESC-ID / IST, University of Lisbon 
+$^4$Inria \& Sorbonne Universités, UPMC Univ Paris 06, LIP6\\
+\small $^5$Currently at Google
+$^6$Microsoft and Cornell University}
+
+\graphicspath{{./figures/redblue/redblueOrder/}{./figures/}}
+
+\maketitle
+
+\input{abstract}
+\input{intro}
+\input{model}
+\input{consistency}
+\input{convergence}
+\input{invariant}
+\input{related}
+\input{conclude}
+
+\begin{thebibliography}{10} 
+\itemsep=1pt 
+\begin{small}
+
+
+\bibitem{dc-outages}
+{7 Data Center Disasters You'll Never See Coming}.
+\newblock
+  \url{http://www.informationweek.com/cloud/7-data-center-disasters-youll-never-see-coming/d/d-id/1320702}.
+\newblock Accessed Feb-2016.
+
+\bibitem{riak}
+Using data types -- riak documentation.
+\newblock \url{http://docs.basho.com/riak/latest/dev/using/data-types/}.
+\newblock Accessed Feb-2016.
+
+\bibitem{soundcloud}
+Consistency without Consensus: CRDTs in Production at SoundCloud.
+\newblock  \url{http://www.slideshare.net/InfoQ/consistency-without-consensus-crdts-in-production-at-soundcloud}
+\newblock Accessed Feb-2016.
+
+\bibitem{chainreaction}
+S.~Almeida, J.~Leit\~{a}o, and L.~Rodrigues.
+\newblock {Chain{R}eaction: A Causal+ Consistent Datastore Based on Chain
+  Replication}.
+  \newblock In {\em EuroSys '13}, 85--98, 2013. ACM.
+%\newblock In {\em Proc.\ 8th ACM European Conf.\ on Computer Systems}, EuroSys
+%  '13, pages 85--98, New York, NY, USA, 2013. ACM.
+
+\bibitem{ramp}
+P.~Bailis, A.~Fekete, J.~M. Hellerstein, A.~Ghodsi, and I.~Stoica.
+\newblock {Scalable Atomic Visibility with RAMP Transactions}.
+\newblock In {\em SIGMOD '14}, 27--38, 2014. ACM.
+%\newblock In {\em Proc.\ 2014 ACM SIGMOD Int.\ Conf.\ on Management of Data},
+%  SIGMOD '14, pages 27--38, New York, NY, USA, 2014. ACM.
+
+\bibitem{bolton}
+P.~Bailis, A.~Ghodsi, J.~M. Hellerstein, and I.~Stoica.
+\newblock {Bolt-on Causal Consistency}.
+\newblock In {\em SIGMOD '13}, 761--772, 2013. ACM.
+%  \newblock In {\em Proc.\ 2013 ACM SIGMOD Int.\ Conf.\ on Management of Data},
+%  SIGMOD '13, pages 761--772, New York, NY, USA, 2013. ACM.
+
+\bibitem{Balegas2015Indigo}
+V.~Balegas, S.~Duarte, C.~Ferreira, R.~Rodrigues, N.~Pregui\c{c}a,
+  M.~Najafzadeh, and M.~Shapiro.
+\newblock Putting consistency back into eventual consistency.
+\newblock In {\em EuroSys '15}, 6:1--6:16, 2015. ACM.
+%  \newblock In {\em Proceedings of the Tenth European Conference on Computer
+%  Systems}, EuroSys '15, pages 6:1--6:16, New York, NY, USA, 2015. ACM.
+
+\bibitem{Balegas2015Counter}
+V.~Balegas, D.~Serra, S.~Duarte, C.~Ferreira, M.~Shapiro, R.~Rodrigues, and
+  N.~Preguica.
+\newblock Extending eventually consistent cloud databases for enforcing numeric
+  invariants.
+\newblock In {\em SRDS '15}, 31--36, Sept 2015.
+%  \newblock In {\em Reliable Distributed Systems (SRDS), 2015 IEEE 34th Symposium
+%  on}, pages 31--36, Sept 2015.
+
+\bibitem{BarbaraMilla1994Demarcation}
+D.~Barbar\'{a}-Mill\'{a} and H.~Garcia-Molina.
+\newblock The demarcation protocol: A technique for maintaining constraints in
+  distributed database systems.
+\newblock {\em The VLDB Journal}, 3(3):325--353, July 1994.
+
+\bibitem{Bernstein1987CCR}
+P.~A. Bernstein, V.~Hadzilacos, and N.~Goodman.
+\newblock {\em Concurrency Control and Recovery in Database Systems}.
+\newblock Addison-Wesley, 1987.
+
+\bibitem{pnuts}
+B.~F. Cooper, R.~Ramakrishnan, U.~Srivastava, A.~Silberstein, P.~Bohannon,
+  H.-A. Jacobsen, N.~Puz, D.~Weaver, and R.~Yerneni.
+\newblock {PNUTS: Yahoo!'s Hosted Data Serving Platform}.
+\newblock {\em Proc. VLDB Endow.}, 1(2):1277--1288, Aug. 2008.
+
+\bibitem{spanner}
+J.~C. Corbett, J.~Dean, M.~Epstein, A.~Fikes, C.~Frost, J.~J. Furman,
+  S.~Ghemawat, A.~Gubarev, C.~Heiser, P.~Hochschild, W.~Hsieh, S.~Kanthak,
+  E.~Kogan, H.~Li, A.~Lloyd, S.~Melnik, D.~Mwaura, D.~Nagle, S.~Quinlan,
+  R.~Rao, L.~Rolig, Y.~Saito, M.~Szymaniak, C.~Taylor, R.~Wang, and
+  D.~Woodford.
+\newblock {Spanner: Google's Globally-distributed Database}.
+\newblock In {\em OSDI '12}, 251--264, 2012. USENIX
+  Association.
+%\newblock In {\em Proc.\ 10th USENIX Conf.\ on Operating Systems Design and
+%  Implementation}, OSDI'12, pages 251--264, Berkeley, CA, USA, 2012. USENIX
+%  Association.
+
+\bibitem{dynamo}
+G.~DeCandia, D.~Hastorun, M.~Jampani, G.~Kakulapati, A.~Lakshman, A.~Pilchin,
+  S.~Sivasubramanian, P.~Vosshall, and W.~Vogels.
+\newblock {Dynamo: Amazon's Highly Available Key-value Store}.
+\newblock In {\em  SOSP '07}, 205--220, 2007. ACM.
+%\newblock In {\em Proc.\ 21st ACM SIGOPS Symp.\ on Operating Systems
+% Principles}, SOSP '07, pages 205--220, New York, NY, USA, 2007. ACM.
+
+\bibitem{orbe}
+J.~Du, S.~Elnikety, A.~Roy, and W.~Zwaenepoel.
+\newblock {Orbe: Scalable Causal Consistency Using Dependency Matrices and
+  Physical Clocks}.
+\newblock In {\em  SOCC '13}, 11:1--11:14, 2013. ACM.
+%  \newblock In {\em Proc.\ 4th Annual Symp.\ on Cloud Computing}, SOCC '13, pages
+%  11:1--11:14, New York, NY, USA, 2013. ACM.
+
+\bibitem{semanticDDB}
+H.~Garcia-Molina.
+\newblock Using semantic knowledge for transaction processing in a distributed
+  database.
+\newblock {\em ACM Trans. Database Syst.}, 8(2):186--213, June 1983.
+
+\bibitem{GotsmanConsistencyReason}
+A.~Gotsman, H.~Yang, C.~Ferreira, M.~Najafzadeh, and M.~Shapiro.
+\newblock 'cause i'm strong enough: Reasoning about consistency choices in
+  distributed systems.
+\newblock In {\em POPL 2016}, 371--384, 2016. ACM.
+%  \newblock In {\em Proceedings of the 43rd Annual ACM SIGPLAN-SIGACT Symposium
+%  on Principles of Programming Languages}, POPL 2016, pages 371--384, New York,
+%  NY, USA, 2016. ACM.
+
+\bibitem{mdcc}
+T.~Kraska, G.~Pang, M.~J. Franklin, S.~Madden, and A.~Fekete.
+\newblock {MDCC: Multi-data Center Consistency}.
+\newblock In {\em EuroSys '13}, 113--126, 2013. ACM.
+%  \newblock In {\em Proc.\ 8th ACM European Conf.\ on Computer Systems}, EuroSys
+%  '13, pages 113--126, New York, NY, USA, 2013. ACM.
+
+\bibitem{Ladin1992LazyReplication}
+R.~Ladin, B.~Liskov, L.~Shrira, and S.~Ghemawat.
+\newblock Providing high availability using lazy replication.
+\newblock {\em ACM Trans. Comput. Syst.}, 10(4):360--391, Nov. 1992.
+
+\bibitem{cassandra}
+A.~Lakshman and P.~Malik.
+\newblock {Cassandra: A Decentralized Structured Storage System}.
+\newblock In {\em SIGOPS Oper. Syst. Rev.}, 44(2):35--40, 2010.
+
+\bibitem{Li14Automating}
+C.~Li, J.~Leit{\~a}o, A.~Clement, N.~Pregui{\c c}a, R.~Rodrigues, and
+  V.~Vafeiadis.
+\newblock Automating the choice of consistency levels in replicated systems.
+\newblock In {\em ATC '14},
+  281--292, 2014. USENIX Association.
+%  \newblock In {\em 2014 USENIX Annual Technical Conference (USENIX ATC 14)},
+%  pages 281--292, Philadelphia, PA, June 2014. USENIX Association.
+
+\bibitem{Li2012RedBlue}
+C.~Li, D.~Porto, A.~Clement, J.~Gehrke, N.~Pregui\c{c}a, and R.~Rodrigues.
+\newblock {Making Geo-replicated Systems Fast As Possible, Consistent when
+  Necessary}.
+\newblock In {\em OSDI '12}, 265--278, 2012. USENIX
+  Association.
+%\newblock In {\em Proc.\ 10th USENIX Conf.\ on Operating Systems Design and
+%  Implementation}, OSDI'12, pages 265--278, Berkeley, CA, USA, 2012. USENIX
+%  Association.  
+  
+
+\bibitem{warranties}
+J.~Liu, T.~Magrino, O.~Arden, M.~D. George, and A.~C. Myers.
+\newblock Warranties for faster strong consistency.
+\newblock In { \em NSDI '14}, 2014. USENIX Association.
+%\newblock In {\em Proc.\ 11th USENIX Conf.\ on Networked Systems Design and
+%  Implementation}, {NSDI'14}, Berkeley, CA, USA, 2014. USENIX Association.
+
+\bibitem{cops}
+W.~Lloyd, M.~J. Freedman, M.~Kaminsky, and D.~G. Andersen.
+\newblock {Don't Settle for Eventual: Scalable Causal Consistency for Wide-area
+  Storage with COPS}.
+\newblock In { \em SOSP  '11}
+, 401--416, 2011. ACM.
+%\newblock In {\em Proc.\ 23d ACM Symp.\ on Operating Systems Principles}, SOSP
+%  '11, pages 401--416, New York, NY, USA, 2011. ACM.
+
+\bibitem{eiger}
+W.~Lloyd, M.~J. Freedman, M.~Kaminsky, and D.~G. Andersen.
+\newblock {Stronger Semantics for Low-latency Geo-replicated Storage}.
+\newblock In {\em  NSDI '13}, 313--328, 2013. USENIX
+  Association.
+%  \newblock In {\em Proc.\ 10th USENIX Conf.\ on Networked Systems Design and
+%  Implementation}, {NSDI'13}, pages 313--328, Berkeley, CA, USA, 2013. USENIX
+%  Association.
+
+\bibitem{Mahajan2010Depot}
+P.~Mahajan, S.~Setty, S.~Lee, A.~Clement, L.~Alvisi, M.~Dahlin, and M.~Walfish.
+\newblock Depot: cloud storage with minimal trust.
+\newblock In {\em OSDI}, 2010.
+
+\bibitem{replicatedcommit}
+H.~Mahmoud, F.~Nawab, A.~Pucher, D.~Agrawal, and A.~El~Abbadi.
+\newblock {Low-latency Multi-datacenter Databases Using Replicated Commit}.
+\newblock {\em Proc. VLDB Endow.}, 6(9):661--672, 2013.
+
+\bibitem{ONeil1986Escrow}
+P.~E. O'Neil.
+\newblock The escrow transactional method.
+\newblock {\em ACM Trans. Database Syst.}, 11(4):405--430, Dec. 1986.
+
+\bibitem{mobisnap}
+N.~Pregui\c{c}a, J.~L. Martins, M.~Cunha, and H.~Domingos.
+\newblock {Reservations for Conflict Avoidance in a Mobile Database System}.
+\newblock In {\em MobiSys '03}, 43--56, 2003. ACM.
+%  \newblock In {\em Proc.\ 1st Int.\ Conf.\ on Mobile Systems, Applications and
+%  Services}, MobiSys '03, pages 43--56, New York, NY, USA, 2003. ACM.
+
+\bibitem{Roy14Writes}
+S.~Roy, L.~Kot, G.~Bender, B.~Ding, H.~Hojjat, C.~Koch, N.~Foster, and
+  J.~Gehrke.
+\newblock The homeostasis protocol: Avoiding transaction coordination through
+  program analysis.
+\newblock In {\em SIGMOD '15}, 1311--1326, 2015.
+%\newblock In {\em Proceedings of the 2015 {ACM} {SIGMOD} International
+%  Conference on Management of Data, Melbourne, Victoria, Australia, May 31 -
+%  June 4, 2015}, pages 1311--1326, 2015.  
+
+\bibitem{Schurman2009latency}
+E.~Schurman and J.~Brutlag.
+\newblock Performance related changes and their user impact. {P}resented at
+  velocity web performance and operations conference.
+\newblock \url{http://slideplayer.com/slide/1402419/}, 2009.
+
+\bibitem{crdts}
+M.~Shapiro, N.~Pregui\c{c}a, C.~Baquero, and M.~Zawirski.
+\newblock {Conflict-free Replicated Data Types}.
+\newblock In {\em SSS '11}, 386--400, 2011. Springer-Verlag.
+%\newblock In {\em Proc.\ 13th Int.\ Conf.\ on Stabilization, Safety, and
+%  Security of Distributed Systems}, SSS'11, pages 386--400, Berlin, Heidelberg,
+%  2011. Springer-Verlag.  
+  
+
+\bibitem{exo-leasing}
+L.~Shrira, H.~Tian, and D.~Terry.
+\newblock {Exo-leasing: Escrow Synchronization for Mobile Clients of Commodity
+  Storage Servers}.
+\newblock In {\em Middleware '08}, 42--61, 2008. Springer-Verlag New
+  York, Inc.
+%\newblock In {\em Proc.\ 9th ACM/IFIP/USENIX Int.\ Conf.\ on Middleware},
+%  Middleware '08, pages 42--61, New York, NY, USA, 2008. Springer-Verlag New
+%  York, Inc.
+
+\bibitem{Singh2009Zeno}
+A.~Singh, P.~Fonseca, P.~Kuznetsov, R.~Rodrigues, and P.~Maniatis.
+\newblock {Zeno: Eventually Consistent Byzantine-Fault Tolerance.}
+\newblock In {\em NSDI'09}, 169--184, 2009.
+%  \newblock In {\em Proceedings of the 6th USENIX Symposium on Networked Systems
+%  Design and Implementation (NSDI'09)}, pages 169--184, 2009.
+
+\bibitem{dynamoDB}
+S.~Sivasubramanian.
+\newblock {Amazon DynamoDB: A Seamlessly Scalable Non-relational Database
+  Service}.
+\newblock In {\em SIGMOD '12}, 729--730, 2012. ACM.
+%  \newblock In {\em Proc.\ 2012 ACM SIGMOD Int.\ Conf.\ on Management of Data},
+%  SIGMOD '12, pages 729--730, New York, NY, USA, 2012. ACM.
+
+\bibitem{walter}
+Y.~Sovran, R.~Power, M.~K. Aguilera, and J.~Li.
+\newblock {Transactional Storage for Geo-replicated Systems}.
+\newblock In {\em SOSP  '11}, 385--400, 2011. ACM.
+%\newblock In {\em Proc.\ 23d ACM Symp.\ on Operating Systems Principles}, SOSP
+%  '11, pages 385--400, New York, NY, USA, 2011. ACM.  
+  
+
+\bibitem{Pileus}
+D.~B. Terry, V.~Prabhakaran, R.~Kotla, M.~Balakrishnan, M.~K. Aguilera, and
+  H.~Abu-Libdeh.
+\newblock {Consistency-based Service Level Agreements for Cloud Storage}.
+\newblock In {\em SOSP '13}, 309--324, 2013. ACM.
+% \newblock In {\em Proc.\ 24th ACM Symp.\ on Operating Systems Principles}, SOSP
+%  '13, pages 309--324, New York, NY, USA, 2013. ACM.
+
+\bibitem{bayou}
+D.~B. Terry, M.~M. Theimer, K.~Petersen, A.~J. Demers, M.~J. Spreitzer, and
+  C.~H. Hauser.
+\newblock {Managing Update Conflicts in Bayou, a Weakly Connected Replicated
+  Storage System}.
+\newblock In {\em SOSP  '95}, 172--182, 1995. ACM.
+%  \newblock In {\em Proc.\ 15th ACM Symp.\ on Operating Systems Principles}, SOSP
+%  '95, pages 172--182, New York, NY, USA, 1995. ACM.
+
+\bibitem{Walborn95Semantics}
+G.~D. Walborn and P.~K. Chrysanthis.
+\newblock {Supporting Semantics-based Transaction Processing in Mobile Database
+  Applications}.
+\newblock In {\em SRDS '95}, 31--40, 1995. IEEE Computer Society.
+%\newblock In {\em Proc.\ 14th Symp.\ on Reliable Distributed Systems}, SRDS
+%  '95, pages 31--40, Washington, DC, USA, 1995. IEEE Computer Society.  
+  
+
+\bibitem{Zawirski15Write}
+M.~Zawirski, N.~Pregui\c{c}a, S.~Duarte, A.~Bieniusa, V.~Balegas, and
+  M.~Shapiro.
+\newblock Write fast, read in the past: Causal consistency for client-side
+  applications.
+\newblock In {\em Middleware '15}, 75--87, 2015. ACM.
+%\newblock In {\em Proceedings of the 16th Annual Middleware Conference},
+%  Middleware '15, pages 75--87, New York, NY, USA, 2015. ACM.  
+  
+
+\bibitem{transactionchains}
+Y.~Zhang, R.~Power, S.~Zhou, Y.~Sovran, M.~K. Aguilera, and J.~Li.
+\newblock {Transaction Chains: Achieving Serializability with Low Latency in
+  Geo-distributed Storage Systems}.
+\newblock In {\em SOSP '13}, 276--291, 2013. ACM.
+%  \newblock In {\em Proc.\ 24th ACM Symp.\ on Operating Systems Principles}, SOSP
+%  '13, pages 276--291, New York, NY, USA, 2013. ACM.
+
+
+\end{small} 
+\end{thebibliography}
+
+\end{document}
+

@@ -1,0 +1,21 @@
+\begin{abstract}
+Geo-replicated storage systems are at the core of current Internet services.\ Unfortunately, 
+there exists a fundamental tension between consistency and performance for offering scalable 
+geo-replication. Weakening consistency semantics leads to less coordination and consequently
+a good user experience, but it may introduce anomalies such as state divergence and invariant violation.\ In 
+contrast, maintaining stronger consistency precludes anomalies but requires more coordination.\ This 
+paper discusses two main contributions to address this tension.\ First, RedBlue Consistency 
+enables blue operations to be fast (and weakly consistent) while the remaining red operations 
+are strongly consistent (and slow).\ We identify sufficient conditions for determining when 
+operations can be blue or must be red.\ Second, Explicit Consistency further increases the space 
+of operations that can be fast by restricting the concurrent execution of only the operations 
+that can break application-defined invariants.\ We further show how to allow operations to complete 
+locally in the common case, by relying on a reservation system that moves coordination off the 
+critical path of operation execution.
+
+%Main parts of this paper are from two papers: ~\cite{Li2012RedBlue} and ~\cite{Balegas2015Indigo}.
+
+%In this paper, we introduce two pieces of our prior work defining a set of principles for
+%reducing the amount of required coordination for geo-replicated systems by taking into account
+%two important properties, namely state convergence and invariant preservation~\cite{Li2012RedBlue} and ~\cite{Balegas2015Indigo}.
+\end{abstract}

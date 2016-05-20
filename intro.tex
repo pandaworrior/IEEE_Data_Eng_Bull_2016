@@ -1,0 +1,25 @@
+\section{Introduction}
+
+% Geo-replication is key technique, used by providers of major Internet services who deploy several DCs worldwide, and also accessible to anyone who can instantiate VM images in the DCs of cloud providers.
+A geo-replicated system maintains copies of the service state across geographically dispersed locations.
+%A geo-replicated system is a replicated service that runs replica instances in geographically dispersed locations. 
+Geo-replication is not only employed today by virtually all the providers of major Internet services, who typically manage several data centers spread across the globe, but is also accessible to anyone outsourcing their computational needs to cloud providers, since cloud services allow computations or VMs to be instantiated in different data centers.
+
+% There are at least two important reasons for geo-replicating. First is disaster tolerance. Example of data center problems. But another crucial reason is performance, as studies point out.
+There are two main reasons for deploying geo-replicated systems. The first reason is disaster tolerance, i.e., the ability to tolerate the unplanned outage of an entire data center, due to catastrophic events such as natural disasters~\cite{dc-outages}. The second reason is to reduce the latency between the users and the machines that provide the service. The importance of this aspect is demonstrated by several studies that point out an inverse correlation between response times and user satisfaction for important Internet services such as search~\cite{Schurman2009latency}.
+
+% http://www.informationweek.com/cloud/7-data-center-disasters-youll-never-see-coming/d/d-id/1320702
+% http://www.computerworlduk.com/galleries/infrastructure/ten-datacentre-disasters-that-brought-firms-offline-3593580/
+
+% Problem is that latency is at odds with consistency, you can either coordinate replicas and get strongly consistent view or get immediate but inconsistent replies.
+However, there is a fundamental tension between latency and consistency: intuitively, ensuring strong consistency requires coordination between replicas before returning a reply to the user, while, alternatively, a fast response can be given without replica coordination, but only ensuring weak consistency guarantees. This tension has led the providers of global-scale Internet services to choose, for some parts of their services, storage systems offering weak consistency guarantees such as eventual consistency~\cite{dynamo}, and, for other components, systems with strong consistency such as serializability~\cite{Bernstein1987CCR}. 
+%linearizability~\cite{spanner}.
+
+% This paper summarizes in a unified way our two recent results in trying to achieve the best of both worlds: fast if possible and consistent when needed, ie minimal coordination to achieve desired semantics.
+This paper revisits in a unified way two of our recent results in trying to achieve a balance between performance and consistency, by devising methods to build geo-replicated systems that introduce a small amount of coordination between replicas to achieve the desired semantics, i.e., systems that are fast when possible and consistent when necessary~\cite{Li2012RedBlue, Balegas2015Indigo}.
+In the first result, we improve the performance of geo-replicated systems by (1) allowing different operations to execute in either a weakly consistent (fast) or strongly consistent (slow) manner; and (2) identifying a set of principles for making safe use
+and increasing the space of fast operations.
+In the second result, we further increase the space of operations that can execute fast by (1) identifying the operations that can break application invariants when executing concurrently; and (2) deploying concurrency control mechanisms that remove coordination from the critical path of operation execution, while preserving invariants.
+
+% We start by expl system model; then simple scheme based on a two-level classification of ops, which already leads to some results; this is based on important notion of side effects commuting and we discuss how to achieve this using CRDTs; finally we present a more fine-grained classification that goes beyond just two consistency levels, and RW+conclude.
+We start the presentation by laying out our terminology and system model in Section~\ref{sec:model}. We present an initial approach based on a coarse-grained classification into strong and weak consistency in Section~\ref{sec:redblue}. One key aspect of this approach is operation commutativity, and we explain how to achieve it using CRDTs in Section~\ref{sec:crdt}. Then we present an approach that makes use of fine-grained coordination between pairs of operations in Section~\ref{sec:indigo}. We discuss related work in section~\ref{sec:rel} and conclude in Section~\ref{sec:conc}.

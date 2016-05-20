@@ -1,0 +1,263 @@
+\section{State convergence}
+\label{sec:crdt}
+In the previous section we discussed how RedBlue consistency achieves state convergence by
+relying on shadow operations that commute with each other.
+With this approach, defining a new operation also implies
+writing one or more commutative shadow operations, each of which corresponds to a distinct side effect.
+The major challenge of doing this manual work
+is that, in an application with a large number of operations, this process may be
+complex and error-prone.
+
+We now discuss an alternative principled approach to create commutative operations by design.
+Our approach builds on conflict-free replicated data types (CRDTs)~\cite{crdts}, which are
+specially-designed data structures that can be replicated and modified concurrently,
+and include mechanisms to merge concurrent updates in a deterministic way.
+Application operations consist of updates to these elementary data types, thus
+guaranteeing state convergence.
+
+\subsection{CRDTs}
+
+A CRDT is a data type that can be replicated at multiple replicas. As such,
+it defines an interface with a set of operations to read and to modify its state.
+A CRDT replica can be modified by locally executing an update operation.
+When different replicas of the same object are modified concurrently, they
+temporarily diverge.
+CRDTs have built-in support for achieving strong eventual consistency~\cite{crdts}, in which
+all replicas will eventually reach the same (equivalent) state after applying
+the same set of updates, without relying on a distributed conflict arbitration
+process.
+
+Two main flavors of CRDTs have been studied in the literature: operation-based CRDTs
+and state-based CRDTs. For each of these, sufficient conditions for
+achieving strong eventual consistency have been established.
+
+In operation-based CRDTs (or commutative replicated data types), updates
+are propagated by broadcasting operations to every replica in causal order.
+Interestingly, this proposal matches the operation execution decomposition presented
+in RedBlue consistency (Section~\ref{sec:redblue}), where operations are divided in two components, a {\em generator}
+operation that executes in the local replica, has no side effect and produces a
+{\em shadow} operation, which is propagated and executed in all replicas. 
+The two types of operations are analogous to {\em prepare} and {\em downstream} operations
+in the context of  operation-based CRDTs, respectively, with the main difference that shadow operations are assigned a consistency level in RedBlue consistency.
+Similarly to the consequence of commutative shadow operations, the replicas of an operation-based CRDT converge to the same state after executing the same set of updates (in any order that respects causality)
+if the execution of any two concurrent downstream operations commutes~\cite{crdts}.
+
+A state-based CRDT (or convergent replicated data type) defines, in addition to
+the operations to read and update its state, an operation to merge the
+state of two replicas.
+Replicas synchronize by exchanging the full replica states: when a new
+state is received, the new updates are incorporated in the local replica
+by executing the merge function.
+It has been shown that the replicas of a state-based CRDT converge to the same state
+after all replicas synchronize (directly or indirectly) if:
+\begin{inparaenum}[(1)]
+\item all the possible states of an object are partially ordered, forming a
+join-semilattice;
+\item the merge operation between two states is the semilattice join; and
+\item an update monotonically increases the state according to the defined
+partial order~\cite{crdts}.
+\end{inparaenum}
+
+\subsection{Examples}
+
+CRDTs have been used in a number of research systems, such as Walter \cite{walter}
+and SwiftCloud \cite{Zawirski15Write},
+and commercial systems, such as Riak \cite{riak} and SoundCloud \cite{soundcloud}.
+These systems include CRDTs that implement several data types, such as
+registers, counters, sets, maps, and flags. For each such data type, it is possible to define and implement different semantics
+to handle concurrent updates, leading to different CRDTs.
+These semantics define which is the final state of a CRDT when
+concurrent updates occur.
+For example, for sets, it is possible to define an \emph{add-wins} semantics,
+where, in the presence of a concurrent add and remove of some element $e$,
+the final state will contain $e$ (or, more precisely, there exists an add of $e$
+that does not happen before a remove of $e$).
+It is also possible to define a \emph{remove-wins} semantics, where the remove will
+win over a concurrent add.
+Other semantics can also be implemented, such as a \emph{last-writer-wins} strategy where
+an element will belong to the set or not depending on which was the last operation
+executed, according to the order among operations.
+
+When creating an application, an application developer must select the CRDT
+with the most appropriate semantics for its goal.
+For example, in the bank account example, the balance of an account can be modeled
+as a counter and the set of accounts of a client can be maintained in an add-win set or map CRDT.
+
+In general, an application operation will manipulate multiple data objects.
+When using CRDTs, it is possible to maintain replicas of these objects in multiple nodes.
+An operation can execute by accessing a single replica of each object it accesses.
+These updates can later be propagated to other nodes, with CRDT rules guaranteeing
+that the replicas of each object will converge to the same state.
+By propagating the updates to all objects modified in an operation atomically,
+it is possible to guarantee that all effects of an operation are observed at the
+same time.
+
+\paragraph{CRDTs for relational databases}
+
+\begin{table}[t!]
+\small
+\centering
+\begin{tabular}{|c|c|p{9.3cm}|}
+\hline
+SQL type & CRDT & Description \\
+\hline
+\hline
+\multirow{2}{*}{FIELD*} & LWW &  Use last-writer-wins to solve concurrent updates\\\cline{2-3}
+ & NUMDELTA  &  Add a delta to the numeric value \\\hline
+\multirow{2}{*}{TABLE} & AOSET,                       UOSET,       & Sets with restricted operations (add, update, and/or remove). \\
+& AUSET,              ARSET & Conflicting operations are logically executed by timestamp order.\\
+\hline
+\end{tabular}
+\caption{Commutative replicated data types (CRDTs) for relational data. *
+FIELD covers primitive types such as integer, float, double, datetime and string.}
+\label{tab:crdts}
+\end{table}
+
+In relational databases, it is also possible to model data using CRDTs.
+Table \ref{tab:crdts} presents the mapping proposed in SIEVE \cite{Li14Automating}.
+Regarding table fields, we defined only two CRDTs. The \emph{LWW} CRDT can be
+used with any field type and implements a \emph{last-writer-wins} strategy
+for defining the final value of a field.
+The \emph{NUMDELTA} CRDT can be used with numeric fields, and transforms each
+update operation in a downstream operation that adds or subtracts
+a constant to the value of the field.
+This can be used to support account balances,
+counters, etc.
+
+A database table can be seen as a set of tuples.
+In the general case, and following the semantics of the \emph{ARSET} CRDT, when concurrent
+\emph{insert}, \emph{update} and \emph{delete} operations occur,
+the following rules can be used:
+\begin{inparaenum}[(1)]
+\item concurrent inserts of tuples with the same key are treated as an insert followed
+by a sequence of updates;
+\item for concurrent updates, the rules defined for fields
+are used to deterministically define the final value;
+\item a delete will only take effect if no concurrent update or insert was executed.
+\end{inparaenum}
+
+While using CRDTs guarantees that all replicas converge to the same state, it does
+not guarantee that the convergence rules executed independently by different CRDTs
+maintain application invariants. Next, we show how we can address
+this problem by restricting the concurrent execution of operations that can break
+application invariants.
+%, \hl{instead of serializing all non-invariant safe shadow operations.}
+
+
+
+%The implementation of these CRDTs in a relational database is detailed
+%elsewhere \cite{Li14Automating}.
+%We note that although both CRDTs ensure convergence, their semantics
+%differ significantly.
+%For example, the first CRDT leads to a final state that does not
+%reflect the effects of all update operations, while the second is only
+%correct if all updates are commutative.
+%
+%For implementing these CRDTs in a relational database, we have added additional
+%metadata to each table for recording for each field/row the timestamp of the
+%last update and of the last delete operation.
+%The information of a deleted row is not removed until it is known that no
+%concurrent update was executed.
+%
+%We have to additionally modify the SQL operations to:
+%\begin{inparaenum}[(1)]
+%\item ignore deleted rows in select operations;
+%\item update the metadata on insert, update and delete operations;
+%\item use the metadata to implement to appropriate CRDT semantics.
+%\end{inparaenum}
+
+
+
+
+%Next, we will show how we can define CRDTs that are appropriate for handling
+%concurrent updates in relational databases.
+
+%While this approach guarantees that all replicas converge to the same state, it does
+%not guarantee that the convergence rules executed independently by different CRDTs
+%maintain application invariants. In Section~\ref{sec:indigo}, we show how we can address
+%this problem by restricting the concurrent execution of operations that can break
+%application invariants.
+%
+%\subsection{CRDTs for relational databases}
+%
+%We now show that data in a relational database can be modeled using
+%CRDTs.
+%Table \ref{tab:crdts} presents the mapping proposed in SIEVE \cite{Li14Automating}.
+%
+%\begin{table}[t!]
+%\footnotesize
+%\centering
+%\begin{tabular}{|c|c|p{8cm}|}
+%\hline
+%SQL type & CRDT & Description \\
+%\hline
+%\multirow{3}{*}{FIELD*} & LWW &  Use last-writer-wins to solve concurrent updates\\\cline{2-3}
+% & NUMDELTA  &  Add a delta to the numeric value \\\hline
+%TABLE & AOSET,                       UOSET,                AUSET,              ARSET & Sets with restricted operations (add, update, and/or remove).
+%Conflicting ops.\ are logically executed by timestamp order.\\
+%\hline
+%\end{tabular}
+%\caption{Commutative replicated data types (CRDTs) for relational data. *
+%FIELD covers primitive types such as integer, float, double, datetime and string.}
+%\label{tab:crdts}
+%\end{table}
+%
+%A database table can be seen as a set of tuples (with the key identifying
+%the tuple).
+%We have defined different semantics for these sets, that whether
+%concurrent \emph{insert} and \emph{delete} SQL operations are allowed
+%and how they are treated.
+%For example, the \emph{AOSET} does not support \emph{delete} operations.
+%The \emph{ARSET} supports concurrent \emph{insertion}, \emph{updates} and
+%\emph{deletes}.
+%Concurrent insertions of tuples with the same key are logically transformed
+%in an insert followed by an update.
+%For concurrent updates of the same data, the rules defined for fields
+%are used to deterministically define the final value.
+%A delete operation will only take effect if no concurrent update or insert
+%is executed. Thus, the ARSET provides a semantics that can be characterized as
+%update-wins, where any update to data wins over a concurrent delete.
+%
+%For table fields we have defined only two CRDTs. The \emph{LWW} CRDT can be
+%used with any field type and implements a \emph{last-writer-wins} strategy where
+%the update with the highest timestamp is selected for defining the final value of a field.
+%
+%For numeric fields, when a field is updated using a SQL update command,
+%the programmer could have two different
+%intentions in terms of what the update means and how concurrent
+%updates should be handled:
+%\begin{inparaenum}[(i)]
+%\item the update can represent a delta to be
+%added or subtracted from the current value (e.g., when updating the
+%stock of a certain item), in which case all concurrent updates should
+%be applied possibly in a different order at all replicas to ensure that no stock
+%changes are lost, or
+%\item it can be overwriting an old value with a new
+%value (e.g., when updating the year of birth in a user profile), in
+%which case an order for these updates should be arbitrated, and the last
+%written value should prevail.
+%\end{inparaenum}
+%The latter case can be addressed using the \emph{LWW} CRDT, while
+%for the former we have defined the \emph{NUMDELTA} CRDT, where each
+%update operation is transformed in a downstream operation that adds or subtracts
+%a constant to the value of the field.
+%
+%Both strategies ensure convergence, but their semantics differ significantly.
+%For example, the second strategy leads to a final state that does not
+%reflect the effects of all update operations, while the second is only
+%correct if all updates are commutative.
+%
+%For implementing these CRDTs in a relational database, we have added additional
+%metadata to each table for recording for each field/row the timestamp of the
+%last update and of the last delete operation.
+%The information of a deleted row is not removed until it is known that no
+%concurrent update was executed.
+%
+%We have to additionally modify the SQL operations to:
+%\begin{inparaenum}[(1)]
+%\item ignore deleted rows in select operations;
+%\item update the metadata on insert, update and delete operations;
+%\item use the metadata to implement to appropriate CRDT semantics.
+%\end{inparaenum}
+%
+

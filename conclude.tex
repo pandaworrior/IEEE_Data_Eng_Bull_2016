@@ -1,0 +1,48 @@
+\section{Conclusion}
+\label{sec:conc}
+
+In this paper we summarized two of our recent results in addressing the fundamental tension
+between latency and consistency in geo-replicated systems. First,
+RedBlue consistency~\cite{Li2012RedBlue} offers fast geo-replication by
+presenting sufficient conditions that allow programmers to safely separate
+weakly consistent (fast) operations from strongly consistent (slow) ones in
+a coarse-grained manner. To increase the space of potential fast operations
+and simplify the programmer's task of defining commutative operations, 
+we propose the use of conflict-free replicated data types. Second,  Explicit Consistency~\cite{Balegas2015Indigo}
+enables programmers to make fine-grained decisions on consistency level assignments
+by connecting application invariants to ordering conflicts between pairs of operations,
+and explores efficient reservation techniques for coordinating conflicting operations with
+low cost.
+
+%Our first work, RedBlue consistency~\cite{Li2012RedBlue}, enables blue
+%operations to be fast (and eventually consistent) while
+%the remaining red operations are strongly consistent
+%(and slow). 
+%We have discussed the conditions when operations
+%can be blue and must be red.
+%To increases the space of potential blue operations
+%and simplify the programmer's task of defining commutative operations, 
+%we propose the use of conflict-free replicated data types.
+%Our second work, Explicit Consistency~\cite{Balegas2015Indigo}, 
+%further increases the space of operations that can be fast by 
+%only restricting the concurrent execution of the operations that can break
+%application-defined invariants.
+%We propose a methodology to, from the application-defined invariants, 
+%deploy a reservation system that allow operations to complete locally in the
+%common case, by moving coordination off the critical path of operation execution.
+
+%Main parts of this paper are from two papers: ~\cite{Li2012RedBlue} and ~\cite{Balegas2015Indigo}.
+
+
+%NOTE: the description of redblue and explicit in abstract and conclusion looks very similar. 
+%bibliography needs to be fixed.... I have just copied the bib file from indigo paper to the end of our bib file... some references may be duplicated.
+
+\section*{Acknowledgments}
+
+The research of Rodrigo\ Rodrigues is supported by the European Research Council under an ERC Starting Grant.
+This research was also supported in part 
+    by EU FP7 SyncFree project (609551),
+%    \href{http://syncfree.lip6.fr/}{609\,551 SyncFree} (2013--2016), %
+    %\usebox{\EUflagBW}, 
+    FCT/MCT SFRH/BD/87540/2012, PEst-OE/ EEI/ UI0527/ 2014, 
+NOVA LINCS (UID/CEC/04516/2013), and INESC-ID (UID/CEC/50021/2013).

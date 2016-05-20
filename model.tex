@@ -1,0 +1,45 @@
+\section{System model}
+\label{sec:model}
+
+%\hl{Note that the following paragraph is new. If you like it, then we have to change all terms ``site'' to ``replica'' throughout the whole paper.}
+
+Our system model is that of a
+fully replicated distributed system, where replicas are located in different data centers. Each replica follows a deterministic state machine: there is a set of operations $\mathcal{U}$, which manipulate
+a set of reachable system states $\mathcal{S}$. %When operation $u$ is applied against a state $S$,
+%it produces another state $S'$ (denoted $S'=S+u$). 
+Each operation $u$ is initially submitted at a given replica (preferably in the closest data center), which we
+call the \emph{origin replica} of $u$.
+When the remaining replicas receive a request to replicate this operation, they will apply the operation against their local state. 
+
+%% \hl{remove the whole paragraph. }Our system model is that of a
+%% fully replicated distributed system, where replicas are located in $k$ sites denoted by $\textit{site}_0\ldots \textit{site}_{k-1}$. Each replica follows a deterministic state machine: there is a set of operations $\mathcal{U}$, which manipulate
+%% a set of reachable system states $\mathcal{S}$. %When operation $u$ is applied against a state $S$,
+%% %it produces another state $S'$ (denoted $S'=S+u$). 
+%% Each operation $u$ is initially submitted at a given site, which we
+%% call the \emph{primary site} of $u$ and denote $\textit{site}(u)$.
+%% When a replica at the remaining sites receives a request to replicate this operation, that replica applies the operation against its local state. 
+
+
+Throughout our explanation we will highlight two important properties
+that the replicated system should obey. First, there is
+the {\bf state convergence} property, which says that all the sites
+that have executed the same set of operations against the same initial state are in the same final state.
+%irrespectively of the order in which those operations were executed.
+This is important to prevent a situation where
+the system quiesces (no more updates are received) and
+read-only queries return different results
+depending on which sites the users are connected to.
+%Another important property that consists of ensuring a good user
+%experience is to preserve \textbf{causality}, both in terms of the monotonicity of user requests
+%within a session and preserving causality across clients, which is key
+%to enabling natural semantics~\cite{Petersen1997Flexible}. Additionally,
+%operations invoked by client requests should return a {\bf single value}, precluding solutions that return a set of values
+%corresponding to the outcome of multiple concurrent updates. 
+The second property is to {\bf preserve application-specific invariants}, which comprise a specification for the behavior of the system.
+%The second property is a specification for the behavior of the system, stating that the system should maintain a set of %application-specific
+%{\bf invariants}. 
+To define these, we introduce the primitive $\textit{valid}(S)$ to be {\it
+  true} if state $S$ obeys these invariants and {\it false}
+otherwise. 
+%This allows us to introduce a basic notion of correctness
+%of the implementation of a given service: an operation $u$ is {\it correct} if, for every valid state $S$, $S + u$ is also valid. 
